@@ -178,7 +178,7 @@ def _is_linkable(level):
     return True
 
 
-def _save_level(handler, group, level, name=None, filters=None, idtable=None):
+def _save_level(handler, group, level, name=None, filters=None, idtable=None, pandas_format='table'):
     _id = id(level)
     try:
         oldpath = idtable[_id]
@@ -250,7 +250,7 @@ def _save_level(handler, group, level, name=None, filters=None, idtable=None):
 
     elif _pandas and isinstance(level, (pd.DataFrame, pd.Series, pd.Panel)):
         store = _HDFStoreWithHandle(handler)
-        store.put(group._v_pathname + '/' + name, level)
+        store.put(group._v_pathname + '/' + name, level, format=pandas_format)
 
     elif isinstance(level, (sparse.dok_matrix,
                             sparse.lil_matrix)):
@@ -501,7 +501,7 @@ def _load_sliced_level(handler, level, sel):
         raise ValueError('Cannot partially load this data type using `sel`')
 
 
-def save(path, data, compression='default'):
+def save(path, data, compression='default', pandas_format='table'):
     """
     Save any Python structure to an HDF5 file. It is particularly suited for
     Numpy arrays. This function works similar to ``numpy.save``, except if you
@@ -581,7 +581,7 @@ def save(path, data, compression='default'):
             idtable[id(data)] = '/'
             for key, value in data.items():
                 _save_level(h5file, group, value, name=key,
-                            filters=filters, idtable=idtable)
+                            filters=filters, idtable=idtable, pandas_format=pandas_format)
 
         elif (_sns and isinstance(data, SimpleNamespace) and
               _dict_native_ok(data.__dict__)):
@@ -589,11 +589,11 @@ def save(path, data, compression='default'):
             group._v_attrs[DEEPDISH_IO_ROOT_IS_SNS] = True
             for key, value in data.__dict__.items():
                 _save_level(h5file, group, value, name=key,
-                            filters=filters, idtable=idtable)
+                            filters=filters, idtable=idtable, pandas_format=pandas_format)
 
         else:
             _save_level(h5file, group, data, name='data',
-                        filters=filters, idtable=idtable)
+                        filters=filters, idtable=idtable, pandas_format=pandas_format)
             # Mark this to automatically unpack when loaded
             group._v_attrs[DEEPDISH_IO_UNPACK] = True
 
