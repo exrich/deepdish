@@ -250,7 +250,7 @@ def _save_level(handler, group, level, name=None, filters=None, idtable=None, pa
 
     elif _pandas and isinstance(level, (pd.DataFrame, pd.Series, pd.Panel)):
         store = _HDFStoreWithHandle(handler)
-        store.put(group._v_pathname + '/' + name, level, format=pandas_format)
+        store.put(group._v_pathname + '/' + name, level, format=pandas_format, data_columns=[])
 
     elif isinstance(level, (sparse.dok_matrix,
                             sparse.lil_matrix)):
